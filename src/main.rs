@@ -29,7 +29,7 @@ fn main() {
 
     println!("UART set write mode");
     uart.set_write_mode(false).unwrap();
-    let str_to_send = "Hello, world!";
+    let str_to_send = "h";
 
     loop {
         println!("UART trying to send data");
