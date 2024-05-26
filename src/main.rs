@@ -7,8 +7,8 @@ fn main() {
     println!("Hello, world!");
     let mut pin = Gpio::new();
     let gpio = pin.unwrap();
-    let txd_pin = gpio.get(14).unwrap().into_output();
-    let rxd_pin = gpio.get(15).unwrap().into_input();
+    // let txd_pin = gpio.get(14).unwrap().into_output();
+    // let rxd_pin = gpio.get(15).unwrap().into_input();
 
     // let mut serial = serial::Serial::new(txd_pin, rxd_pin, 9600);
 
@@ -22,7 +22,8 @@ fn main() {
     // );
 
     let mut uart_result = Uart::new(
-        19200,
+        19_200,
+        // 38400,
         Parity::None,
         8,
         1,
@@ -40,33 +41,41 @@ fn main() {
         }
     }
 
-    println!("UART initialized");
+    println!("uart set read mode");
+    _ = uart.set_read_mode(1, Duration::from_millis(100));
+    println!("uart flush");
     uart.flush(Queue::Both).unwrap();
-
-    println!("UART set write mode");
-    uart.set_write_mode(true).unwrap();
-    let str_to_send = "h";
-
+    let mut buf = [0; 25];
     loop {
-        println!("UART trying to send data 1");
-        // uart.flush(Queue::Input).unwrap();
-        // uart.flush(Queue::Output).unwrap();
-        uart.flush(Queue::Both).unwrap();
-        uart.send_start().unwrap();
-        let res = uart.write(str_to_send.as_bytes());
-        match res {
-            Ok(bs) => {
-                println!("UART sent data, size: {}", bs);
+ 
+
+        if uart.is_read_blocking() {
+            println!("UART trying to read data");
+            // if !first {
+            //     uart.flush(Queue::Both).unwrap();
+            // }
+            // first = false;
+            buf = [0; 25];
+            let read_res = uart.read(&mut buf).unwrap();
+            if read_res > 0 {
+                println!("UART read: {:?}", std::str::from_utf8(&buf).unwrap());
             }
-            Err(e) => {
-                println!("Error: {:?}", e);
-            }
+            println!("UART read. empty");
         }
+        // let res = uart.write(str_to_send.as_bytes());
+        // match res {
+        //     Ok(bs) => {
+        //         println!("UART sent data, size: {}", bs);
+        //     }
+        //     Err(e) => {
+        //         println!("Error: {:?}", e);
+        //     }
+        // }    
+        // 
+        // uart.send_stop().unwrap();
+        println!("loop...");
 
-        uart.send_stop().unwrap();
-
-
-        println!("Sent: {:?}", str_to_send);
+        // println!("Sent: {:?}", str_to_send);
         thread::sleep(Duration::from_secs(1));
 
         // let mut buf = [0; 1];
