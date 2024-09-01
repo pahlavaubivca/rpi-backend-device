@@ -18,3 +18,8 @@
 sudo usermod -a -G dialout <USER>
 ```
 
+# Faq
+
+## UART not work without connected screen
+
+I suspisious on bad ground in current power setup. Lets try connect both device on the same ground
